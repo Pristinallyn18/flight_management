@@ -30,7 +30,8 @@ CHECK (employment_status IN ('Active', 'On leave', 'Retired'))
 );
 
 CREATE TABLE Flight_Assignment (
-flight_id INTEGER,
+flight_id 
+INTEGER,
 pilot_id INTEGER,
 flight_role TEXT NOT NULL
 CHECK (flight_role IN ('Captain', 'First Officer', 'Reserve')),

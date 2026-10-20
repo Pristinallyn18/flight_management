@@ -39,9 +39,14 @@ INSERT INTO Flights (schedule_date, schedule_time, departure_point, aircraft_typ
 VALUES ('2026-10-27', '08:15', 'LHR', 'Boeing 787-9', 'AZ631', 7);
 
 -- (F7) Change a flight’s departure date or time
+UPDATE Flights
+SET schedule_time = '08:10'
+WHERE flight_id = 1;
 
 -- (F8) Change a flight’s status
-
+UPDATE Flights
+SET status = 'Delayed'
+WHERE flight_id = 1;
 
 -- PILOTS QUERIES
 
@@ -52,6 +57,8 @@ WHERE employment_status = 'Active'
 ORDER BY pilot_name;
 
 -- (P2) Assign a pilot to a flight
+INSERT INTO Flight_Assignment (flight_id, pilot_id, flight_role)
+VALUES (4, 10, 'Reserve');
 
 -- (P3) View a pilot’s schedule AND assignment
 SELECT Pilots.pilot_id, Pilots.pilot_name, Flight_Assignment.flight_role, Flights.flight_number, Flights.schedule_date, Flights.schedule_time, Flights.departure_point
@@ -67,9 +74,11 @@ FROM Flight_Assignment
 JOIN Pilots ON Pilots.pilot_id = Flight_Assignment.pilot_id
 JOIN Flights ON Flights.flight_id = Flight_Assignment.flight_id
 WHERE Flight_Assignment.flight_id = 4
-ORDER BY Flight_Assignment.flight_id;
+ORDER BY Flight_Assignment.flight_role;
 
 -- (P5) Remove a pilot from a flight
+DELETE FROM Flight_Assignment
+WHERE flight_id = 4 AND pilot_id = 6;
 
 -- (P6) View pilots with their employment status
 SELECT pilot_id, pilot_name, license_registration, employment_status
@@ -83,15 +92,26 @@ ORDER BY pilot_name;
 -- (D1) View all destinations
 SELECT destination_id, country, city, airport_name, airport_code
 FROM Destination
-ORDER BY country;
+ORDER BY destination_id;
 
 -- (D2) Update a destination’s details
+UPDATE Destination
+SET city = 'Dumaguete City', airport_name = 'Dumaguete City Airport', airport_code = 'DGT'
+WHERE destination_id = 12;
 
 -- SUMMARY VIEW
 
 -- (S1) Number of flights to each destination
-
+SELECT Destination.country, Destination.city, COUNT(Flights.destination_id) AS total_flights
+FROM Destination
+LEFT JOIN Flights ON Destination.destination_id = Flights.destination_id
+GROUP BY Destination.destination_id
+ORDER BY total_flights DESC;
 -- (S2) Number of flights per pilot
 
-
+SELECT Pilots.pilot_name, COUNT(Flight_Assignment.pilot_id) AS total_flights
+FROM Pilots
+LEFT JOIN Flight_Assignment ON Pilots.pilot_id = Flight_Assignment.pilot_id
+GROUP BY Pilots.pilot_id
+ORDER BY total_flights DESC;
 
