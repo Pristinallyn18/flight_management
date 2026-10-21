@@ -170,13 +170,41 @@ def view_flights_by_destination():
     print_results(rows)
 
 def view_flights_by_status():
-    pass
+    status = input("Enter flight status: ")
+    query = """
+        SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
+        FROM Flights
+        JOIN Destination ON Flights.destination_id = Destination.destination_id
+        WHERE Flights.status = ?
+        ORDER BY Flights.schedule_date;
+    """
+    rows = fetch_results(query, (status,))
+    print_results(rows)
 
 def view_flights_by_departure_date():
-    pass
+    departure_date = input("Enter departure date (YYYY-MM-DD): ")
+    query = """
+        SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
+        FROM Flights
+        JOIN Destination ON Flights.destination_id = Destination.destination_id
+        WHERE Flights.schedule_date = ?
+        ORDER BY Destination.country;
+    """
+    rows = fetch_results(query, (departure_date,))
+    print_results(rows)
 
 def view_flights_by_destination_and_status():
-    pass
+    city = input("Enter destination city: ")
+    status = input("Enter flight status: ")
+    query = """
+        SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
+        FROM Flights
+        JOIN Destination ON Flights.destination_id = Destination.destination_id
+        WHERE Destination.city = ? AND Flights.status = ?
+        ORDER BY Flights.schedule_date;
+    """
+    rows = fetch_results(query, (city, status))
+    print_results(rows)
 
 def add_new_flight():
     pass
@@ -219,16 +247,44 @@ def assign_pilot_to_flight():
     pass
 
 def view_pilot_schedule():
-    pass
+    pilot_name = input("Enter pilot name: ")
+    query = """
+        SELECT Pilots.pilot_id, Pilots.pilot_name, Flight_Assignment.flight_role, Flights.flight_number, Flights.schedule_date, Flights.schedule_time, Flights.departure_point
+        FROM Pilots
+        JOIN Flight_Assignment ON Flight_Assignment.pilot_id = Pilots.pilot_id
+        JOIN Flights ON Flight_Assignment.flight_id = Flights.flight_id
+        WHERE Pilots.pilot_name = ?
+        ORDER BY Flights.schedule_date;
+    """
+    rows = fetch_results(query, (pilot_name,))
+    print_results(rows)
 
 def view_flight_crew():
-    pass
+    flight_id = input("Enter flight ID: ")
+    query = """
+        SELECT Flight_Assignment.flight_id, Flights.schedule_date, Flights.schedule_time, Pilots.pilot_name, Flight_Assignment.flight_role
+        FROM Flight_Assignment
+        JOIN Pilots ON Pilots.pilot_id = Flight_Assignment.pilot_id
+        JOIN Flights ON Flights.flight_id = Flight_Assignment.flight_id
+        WHERE Flight_Assignment.flight_id = ?
+        ORDER BY Flight_Assignment.flight_role;
+    """
+    rows = fetch_results(query, (flight_id,))
+    print_results(rows)
 
 def remove_pilot_from_flight():
     pass
 
 def view_pilots_by_employment_status():
-    pass
+    employment_status = input("Enter employment status: ")
+    query = """
+        SELECT pilot_id, pilot_name, license_registration, employment_status
+        FROM Pilots
+        WHERE employment_status = ?
+        ORDER BY pilot_name;
+    """
+    rows = fetch_results(query, (employment_status,))
+    print_results(rows)
 
 
 # Summary functions
