@@ -44,17 +44,19 @@ def print_results(rows):
     input("\nPress Enter to continue...")
 
 def run_change(query, values=()): 
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute(query, values)
-    conn.commit()
-    count = cursor.rowcount
-    conn.close()
-    return count
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(query, values)
+        conn.commit()
+        count = cursor.rowcount
+        return count
+    finally:
+        conn.close()
 
 def choose_option(options):
     for key, value in options.items():
-    print(key, value)
+        print(key, value)
     choice = input("Select an option: ")
     return options.get(choice)
 
@@ -183,6 +185,7 @@ def summaries_menu():
 
 # Flight functions
 
+# F1 - View all flights
 def view_all_flights():
     query = """
         SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
@@ -193,6 +196,7 @@ def view_all_flights():
     rows = fetch_results(query)
     print_results(rows)
 
+# F2 - View flights by destination
 def view_flights_by_destination():
     country = input("Enter country: ")
     query = """
@@ -205,6 +209,7 @@ def view_flights_by_destination():
     rows = fetch_results(query, (country,))
     print_results(rows)
 
+# F3 - View flights by status
 def view_flights_by_status():
     status = input("Enter flight status: ")
     query = """
@@ -217,6 +222,7 @@ def view_flights_by_status():
     rows = fetch_results(query, (status,))
     print_results(rows)
 
+# F4 - View flights by departure date
 def view_flights_by_departure_date():
     departure_date = input("Enter departure date (YYYY-MM-DD): ")
     query = """
@@ -229,25 +235,69 @@ def view_flights_by_departure_date():
     rows = fetch_results(query, (departure_date,))
     print_results(rows)
 
+# F5 - View flights by destination and status
 def view_flights_by_destination_and_status():
     city = input("Enter destination city: ")
-    status = input("Enter flight status: ")
+    status = choose_option(FLIGHT_STATUS)
+
+    if status is None:
+        print("Invalid choice")
+        return
+
     query = """
         SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
         FROM Flights
         JOIN Destination ON Flights.destination_id = Destination.destination_id
         WHERE Destination.city = ? AND Flights.status = ?
-        ORDER BY Flights.schedule_date;
+        ORDER BY Flights.schedule_date
     """
     rows = fetch_results(query, (city, status))
     print_results(rows)
 
+
+# F6 - Add a new flight
 def add_new_flight():
-    pass
+    schedule_date = input("Enter departure date (YYYY-MM-DD): ")
+    schedule_time = input("Enter departure time (HH:MM): ")
+    departure_point = input("Enter departure point: ")
+    aircraft_type = input("Enter aircraft type: ")
+    flight_number = input("Enter flight number: ")
+    destination_id = input("Enter destination ID: ")
 
+    query = """
+        INSERT INTO Flights (schedule_date, schedule_time, departure_point, aircraft_type, flight_number, destination_id)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """
+    try:
+        count = run_change(query, (schedule_date, schedule_time, departure_point, aircraft_type, flight_number, destination_id))
+        if count == 0:
+            print("No flight added")
+        else:
+            print("New flight added successfully")
+    except sqlite3.IntegrityError as e:
+        print("Insert failed:", e)
+
+# F7 - Change a flight's departure date or time
 def change_departure_date_or_time():
-    pass
+    flight_id = input("Enter flight ID: ")
+    new_date = input("Enter new departure date (YYYY-MM-DD): ")
+    new_time = input("Enter new departure time (HH:MM): ")
 
+    query = """
+        UPDATE Flights
+        SET schedule_date = ?, schedule_time = ?
+        WHERE flight_id = ?
+    """
+    try:
+        count = run_change(query, (new_date, new_time, flight_id))
+        if count == 0:
+            print("No flight found with that ID")
+        else:
+            print("Flight departure date and time updated")
+    except sqlite3.IntegrityError as e:
+        print("Update failed:", e)
+
+# F8 - Change a flight's status
 def change_flight_status():
     flight_id = input("Enter flight ID: ")
     new_status = choose_option(FLIGHT_STATUS)
@@ -271,8 +321,10 @@ def change_flight_status():
         print("Update failed:", e)
 
 
+
 # Destination functions
 
+# D1 - View all destinations
 def view_all_destinations():
     query = """
         SELECT destination_id, country, city, airport_name, airport_code
@@ -282,12 +334,31 @@ def view_all_destinations():
     rows = fetch_results(query)
     print_results(rows)
 
+# D2 - Update a destination
 def update_destination():
-    pass
+    destination_id = input("Enter destination ID: ")
+    new_city = input("Enter new city: ")
+    new_airport_name = input("Enter new airport name: ")
+    new_airport_code = input("Enter new airport code: ")
+
+    query = """
+        UPDATE Destination
+        SET city = ?, airport_name = ?, airport_code = ?
+        WHERE destination_id = ?
+    """
+    try:
+        count = run_change(query, (new_city, new_airport_name, new_airport_code, destination_id))
+        if count == 0:
+            print("No destination found with that ID")
+        else:
+            print("Destination updated")
+    except sqlite3.IntegrityError as e:
+        print("Update failed:", e)
 
 
 # Pilot functions
 
+# P1 - View active pilots
 def view_active_pilots():
     query = """
         SELECT pilot_id, pilot_name, license_registration
@@ -298,9 +369,30 @@ def view_active_pilots():
     rows = fetch_results(query)
     print_results(rows)
 
+# P2 - Assign a pilot to a flight
 def assign_pilot_to_flight():
-    pass
+    flight_id = input("Enter flight ID: ")
+    pilot_id = input("Enter pilot ID: ")
+    flight_role = choose_option(FLIGHT_ROLE)
 
+    if flight_role is None:
+        print("Invalid choice")
+        return
+
+    query = """
+        INSERT INTO Flight_Assignment (flight_id, pilot_id, flight_role)
+        VALUES (?, ?, ?)
+    """
+    try:
+        count = run_change(query, (flight_id, pilot_id, flight_role))
+        if count == 0:
+            print("No pilot assignment added")
+        else:
+            print("Pilot assigned to flight")
+    except sqlite3.IntegrityError as e:
+        print("Assignment failed:", e)
+
+# P3 - View a pilot's schedule
 def view_pilot_schedule():
     pilot_name = input("Enter pilot name: ")
     query = """
@@ -314,6 +406,7 @@ def view_pilot_schedule():
     rows = fetch_results(query, (pilot_name,))
     print_results(rows)
 
+# P4 - View the crew of a flight
 def view_flight_crew():
     flight_id = input("Enter flight ID: ")
     query = """
@@ -327,9 +420,26 @@ def view_flight_crew():
     rows = fetch_results(query, (flight_id,))
     print_results(rows)
 
-def remove_pilot_from_flight():
-    pass
 
+# P5 - Remove a pilot from a flight
+def remove_pilot_from_flight():
+    flight_id = input("Enter flight ID: ")
+    pilot_id = input("Enter pilot ID: ")
+
+    query = """
+        DELETE FROM Flight_Assignment
+        WHERE flight_id = ? AND pilot_id = ?
+    """
+    try:
+        count = run_change(query, (flight_id, pilot_id))
+        if count == 0:
+            print("No pilot assignment found with those IDs")
+        else:
+            print("Pilot removed from flight")
+    except sqlite3.IntegrityError as e:
+        print("Removal failed:", e)
+
+# P6 - View pilots by employment status
 def view_pilots_by_employment_status():
     employment_status = input("Enter employment status: ")
     query = """
@@ -344,6 +454,7 @@ def view_pilots_by_employment_status():
 
 # Summary functions
 
+# S1 - Number of flights per destination
 def flights_per_destination():
     query = """
         SELECT Destination.country, Destination.city, COUNT(Flights.destination_id) AS total_flights
@@ -355,6 +466,7 @@ def flights_per_destination():
     rows = fetch_results(query)
     print_results(rows)
 
+# S2 - Number of flights per pilot
 def flights_per_pilot():
     query = """
         SELECT Pilots.pilot_name, COUNT(Flight_Assignment.pilot_id) AS total_flights
