@@ -4,7 +4,7 @@
 SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
 FROM Flights
 JOIN Destination ON Flights.destination_id = Destination.destination_id
-ORDER BY flight_id
+ORDER BY flight_id;
 
 -- (F2) View flights by destination
 SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status

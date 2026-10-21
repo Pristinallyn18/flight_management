@@ -20,6 +20,7 @@ def print_results(rows):
         return
     for row in rows:
         print(row)
+    input("\nPress Enter to continue...")
 
 # Main Menu
 def main_menu():
@@ -157,7 +158,16 @@ def view_all_flights():
     print_results(rows)
 
 def view_flights_by_destination():
-    pass
+    country = input("Enter country: ")
+    query = """
+        SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
+        FROM Flights
+        JOIN Destination ON Flights.destination_id = Destination.destination_id
+        WHERE Destination.country = ?
+        ORDER BY Destination.city;
+    """
+    rows = fetch_results(query, (country,))
+    print_results(rows)
 
 def view_flights_by_status():
     pass
