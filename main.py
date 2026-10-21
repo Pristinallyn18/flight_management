@@ -1,5 +1,26 @@
 import sqlite3
 
+#Option Lists
+FLIGHT_STATUS = {
+    "1" : "Scheduled",
+    "2" : "Delayed",
+    "3" : "Cancelled",
+    "4" : "Rescheduled"
+}
+
+EMPLOYMENT_STATUS = {
+    "1" : "Active",
+    "2" : "On leave",
+    "3" : "Retired"
+}
+
+FLIGHT_ROLE = {
+    "1" : "Captain",
+    "2" : "First Officer",
+    "3" : "Reserve"
+}
+
+
 # Database helpers
 def get_connection():
     conn = sqlite3.connect('flights.db')
@@ -21,6 +42,21 @@ def print_results(rows):
     for row in rows:
         print(row)
     input("\nPress Enter to continue...")
+
+def run_change(query, values=()): 
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    conn.commit()
+    count = cursor.rowcount
+    conn.close()
+    return count
+
+def choose_option(options):
+    for key, value in options.items():
+    print(key, value)
+    choice = input("Select an option: ")
+    return options.get(choice)
 
 # Main Menu
 def main_menu():
@@ -213,7 +249,26 @@ def change_departure_date_or_time():
     pass
 
 def change_flight_status():
-    pass
+    flight_id = input("Enter flight ID: ")
+    new_status = choose_option(FLIGHT_STATUS)
+
+    if new_status is None:
+        print("Invalid choice")
+        return
+
+    query = """
+        UPDATE Flights
+        SET status = ?
+        WHERE flight_id = ?
+    """
+    try:
+        count = run_change(query, (new_status, flight_id))
+        if count == 0:
+            print("No flight found with that ID")
+        else:
+            print("Flight status updated")
+    except sqlite3.IntegrityError as e:
+        print("Update failed:", e)
 
 
 # Destination functions
