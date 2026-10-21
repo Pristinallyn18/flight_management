@@ -388,7 +388,7 @@ def view_active_pilots():
         SELECT pilot_id, pilot_name, license_registration
         FROM Pilots
         WHERE employment_status = 'Active'
-        ORDER BY pilot_name;
+        ORDER BY pilot_id;
     """
     rows = fetch_results(query)
     print_results(rows)
