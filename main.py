@@ -211,7 +211,11 @@ def view_flights_by_destination():
 
 # F3 - View flights by status
 def view_flights_by_status():
-    status = input("Enter flight status: ")
+    status = choose_option(FLIGHT_STATUS)
+
+    if status is None:
+        print("Invalid choice")
+        return
     query = """
         SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
         FROM Flights
@@ -441,7 +445,11 @@ def remove_pilot_from_flight():
 
 # P6 - View pilots by employment status
 def view_pilots_by_employment_status():
-    employment_status = input("Enter employment status: ")
+    employment_status = choose_option(EMPLOYMENT_STATUS)
+    if employment_status is None:
+        print("Invalid choice")
+        return
+    
     query = """
         SELECT pilot_id, pilot_name, license_registration, employment_status
         FROM Pilots
