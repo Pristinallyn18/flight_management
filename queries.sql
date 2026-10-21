@@ -54,7 +54,7 @@ WHERE flight_id = 1;
 SELECT pilot_id, pilot_name, license_registration
 FROM Pilots
 WHERE employment_status = 'Active'
-ORDER BY pilot_name;
+ORDER BY pilot_id;
 
 -- (P2) Assign a pilot to a flight
 INSERT INTO Flight_Assignment (flight_id, pilot_id, flight_role)
