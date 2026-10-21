@@ -1,5 +1,26 @@
 import sqlite3
 
+# Database helpers
+def get_connection():
+    conn = sqlite3.connect('flights.db')
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
+
+def fetch_results(query, values=()): 
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(query, values)
+    results = cursor.fetchall()
+    conn.close()
+    return results
+
+def print_results(rows): 
+    if not rows:
+        print("No results found.")
+        return
+    for row in rows:
+        print(row)
+
 # Main Menu
 def main_menu():
     while True:
@@ -9,7 +30,7 @@ def main_menu():
         print('3 Pilots')
         print('4 Summaries')
         print('0 Exit')
-        user_input = input('Select a number from the options:')
+        user_input = input('Select a number from the options: ')
         if user_input == '1':
             flight_menu()
         elif user_input == '2':
@@ -126,7 +147,14 @@ def summaries_menu():
 # Flight functions
 
 def view_all_flights():
-    pass
+    query = """
+        SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
+        FROM Flights
+        JOIN Destination ON Flights.destination_id = Destination.destination_id
+        ORDER BY flight_id
+    """
+    rows = fetch_results(query)
+    print_results(rows)
 
 def view_flights_by_destination():
     pass

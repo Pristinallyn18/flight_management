@@ -4,14 +4,14 @@
 SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
 FROM Flights
 JOIN Destination ON Flights.destination_id = Destination.destination_id
-ORDER BY Destination.city;
+ORDER BY flight_id
 
 -- (F2) View flights by destination
 SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
 FROM Flights
 JOIN Destination ON Flights.destination_id = Destination.destination_id
 WHERE Destination.country = 'United Kingdom'
-ORDER BY Flights.schedule_date;
+ORDER BY Destination.city;
 
 -- (F3) View flights by status
 SELECT flight_id, flight_number, Destination.country, Destination.city, Flights.schedule_date, Flights.schedule_time, Flights.status
