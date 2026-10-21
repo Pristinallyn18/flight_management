@@ -181,7 +181,13 @@ def change_flight_status():
 # Destination functions
 
 def view_all_destinations():
-    pass
+    query = """
+        SELECT destination_id, country, city, airport_name, airport_code
+        FROM Destination
+        ORDER BY destination_id;
+    """
+    rows = fetch_results(query)
+    print_results(rows)
 
 def update_destination():
     pass
@@ -190,7 +196,14 @@ def update_destination():
 # Pilot functions
 
 def view_active_pilots():
-    pass
+    query = """
+        SELECT pilot_id, pilot_name, license_registration
+        FROM Pilots
+        WHERE employment_status = 'Active'
+        ORDER BY pilot_name;
+    """
+    rows = fetch_results(query)
+    print_results(rows)
 
 def assign_pilot_to_flight():
     pass
@@ -211,10 +224,26 @@ def view_pilots_by_employment_status():
 # Summary functions
 
 def flights_per_destination():
-    pass
+    query = """
+        SELECT Destination.country, Destination.city, COUNT(Flights.destination_id) AS total_flights
+        FROM Destination
+        LEFT JOIN Flights ON Destination.destination_id = Flights.destination_id
+        GROUP BY Destination.destination_id
+        ORDER BY total_flights DESC;
+    """
+    rows = fetch_results(query)
+    print_results(rows)
 
 def flights_per_pilot():
-    pass
+    query = """
+        SELECT Pilots.pilot_name, COUNT(Flight_Assignment.pilot_id) AS total_flights
+        FROM Pilots
+        LEFT JOIN Flight_Assignment ON Pilots.pilot_id = Flight_Assignment.pilot_id
+        GROUP BY Pilots.pilot_id
+        ORDER BY total_flights DESC;
+    """
+    rows = fetch_results(query)
+    print_results(rows)
 
 if __name__ == "__main__":
     main_menu()
