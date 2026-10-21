@@ -27,20 +27,40 @@ def get_connection():
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
-def fetch_results(query, values=()): 
+def fetch_results(query, values=()):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(query, values)
-    results = cursor.fetchall()
+    headers = [column[0] for column in cursor.description]
+    rows = cursor.fetchall()
     conn.close()
-    return results
+    return headers, rows
 
-def print_results(rows): 
+def print_results(data):
+    headers, rows = data
     if not rows:
         print("No results found.")
         return
+
+    widths = []
+
+    for i in range(len(headers)):
+        width = len(headers[i])
+        for row in rows:
+            width = max(width, len(str(row[i])))
+        widths.append(width + 4)
+
+    for i in range(len(headers)):
+        print(headers[i].ljust(widths[i]), end="")
+    print()
+
+    print("-" * sum(widths))
+
     for row in rows:
-        print(row)
+        for i in range(len(row)):
+            print(str(row[i]).ljust(widths[i]), end="")
+        print()
+
     input("\nPress Enter to continue...")
 
 def run_change(query, values=()): 
